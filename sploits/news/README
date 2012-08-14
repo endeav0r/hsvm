@@ -1,0 +1,25 @@
+news is vulnerable to a strcpy buffer overflow, overwriting the return pointer.
+The main loop calls a function to retrieve user input and match against one of
+three strings. When input matches one of these strings, the program will return
+a number corresponding to the string matched.
+
+The buffer is 40 bytes large, plus r1 and rbp pushed on the stack, providing
+44 bytes. However, in order for the function to return, the first 5 bytes must
+match a legitimate string, allowing the attacker 39 bytes for payload. This is
+enough for 9 instructions.
+
+9 instructions is not enough to open, read and write a file. Therefor, the
+attacker must place a larger portion of shellcode elsewhere in the program.
+
+This is a 2-stage exploit.
+
+The first stage is carefully written to avoid the bytes 0x00 and 0x0a. The
+script remove_null_bytes.py will replace the 0x00 bytes with 0x90. Because
+these null bytes are just spacing in the instruction encodings, doing this
+does not affect the instructions.
+
+Stage 1 reads in bytes, writing them to a buffer starting at 0x8080. Once the
+byte 0x99 is read, execution will jump to 0x8080
+
+The second stage is self explanatory, opening the file "flag" and then writing
+each character of the file to stdout

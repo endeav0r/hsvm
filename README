@@ -1,0 +1,368 @@
+
+    __  __      ____        __  __                            _     
+   /\ \/\ \    /\  _`\     /\ \/\ \    /'\_/`\              /' \    
+   \ \ \_\ \   \ \,\L\_\   \ \ \ \ \  /\      \    __  __  /\_, \   
+    \ \  _  \   \/_\__ \    \ \ \ \ \ \ \ \__\ \  /\ \/\ \ \/_/\ \  
+     \ \ \ \ \    /\ \L\ \   \ \ \_/ \ \ \ \_/\ \ \ \ \_/ |   \ \ \ 
+      \ \_\ \_\   \ `\____\   \ `\___/  \ \_\\ \_\ \ \___/     \ \_\
+       \/_/\/_/    \/_____/    `\/__/    \/_/ \/_/  \/__/       \/_/
+
+
+                  HAXATHON SUPREMACY VIRTUAL MACHINE v1
+                             Design Document
+                      endeavor@rainbowsandpwnies.com
+                               12 AUG 2012
+Documentation TODO :
+  syscall instruction
+
+==========================
+= BACKGROUND
+==========================
+The HSVMv1 implements a big-endian, RISC CPU with 16-bit registers, 32-bit
+fixed-width instructions and 64kb of byte-addressable memory. It has been
+developed to facilitate binary analysis tasks in the contest Haxathon
+Supremacy.
+
+There are four components to HSVMv1: assembler, disassembler, vm and debugger.
+
+This document outlines the details of the HSVMv1 instruction set.
+
+
+==========================
+= HSVMv1 Conventions
+==========================
+The r0 register is used for returning results.
+
+All registers _except_ for r0 must be callee saved.
+
+Arguments are passed on the stack. Caller is responsible for stack cleanup.
+This is the same as the cdecl calling convention.
+
+Program execution will begin at address 0.
+
+There is no convention for format of data and code. The two are often found
+freely mixed throughout binaries. This may frustrate disassembly.
+
+
+==========================
+= INSTRUCTION ENCODING
+==========================
+Instructions are encoded according to the following struct:
+
+struct _instruction {
+    uint8_t opcode;
+    uint8_t operand_0;
+    union {
+        struct {
+            uint8_t operand_1;
+            uint8_t operand_2;
+        } __attribute__((packed));
+        uint16_t lval;
+    };
+} __attribute__((packed));
+
+This enables the following encodings:
+
+ 0-7            8-15           16-23           24-31          Encoding Name
+|--------------|--------------|--------------|--------------|
+| OPCODE       |              |              |              | Encoding-A
+|--------------|--------------|--------------|--------------|
+| OPCODE       | REGISTER-A   |              |              | Encoding-B
+|--------------|--------------|--------------|--------------|
+| OPCODE       | REGISTER-A   | REGISTER-B   |              | Encoding-C
+|--------------|--------------|--------------|--------------|
+| OPCODE       | REGISTER-A   | REGISTER-B   | REGISTER-C   | Encoding-D
+|--------------|--------------|--------------|--------------|
+| OPCODE       | REGISTER-A   | LVAL                        | Encoding-E
+|--------------|--------------|--------------|--------------|
+| OPCODE       |              | LVAL                        | Encoding-F
+|--------------|--------------|--------------|--------------|
+
+The format of the instruction is determined by the opcode. Not all instructions
+require all 32-bits. However, the size of instructions is fixed at 32-bits.
+Instruction bytes not required for the instruction may contain any value and
+will not invalidate the instruction.
+
+While all instructions are 32-bits, instructions have no alignment
+requirements.
+
+
+==========================
+= REGISTERS
+==========================
+There are 10 general purpose registers. The first eight are of the form:
+r0, r1, r2, r3, r4, r5, r6 and r7
+The last two GPRs are rsp and rbp. The register rsp is modified directly by the
+instructions push, pop, call and ret.
+
+The instruction pointer is rip and is directly accessible by the user in all
+places where other GPRs are accessible.
+
+There is a flags register unavailable to the user. It is set by the result of
+the cmp instruction.
+
+The encodings for the user-accessible registers are:
+r0  : 0x00
+r1  : 0x01
+r2  : 0x02
+r3  : 0x03
+r4  : 0x04
+r5  : 0x05
+r6  : 0x06
+r7  : 0x0A
+rbp : 0x08
+rsp : 0x09
+rip : 0x07
+
+It may seem odd that rip is 0x07 while 0x07 is 0x0A. This decision was made
+carefully... check your ASCII charts.
+
+
+==========================
+= INSTRUCTIONS
+==========================
+
+The HSVMv1 instructions are:
+
+add,  sub,   mul,  div,   mod,  and, or, xor
+cmp,  je,    jne,  jl,    jle,  jg,  jge
+call, jmp,   ret
+load, loadb, stor, storb, push, pop
+in,   out
+mov,  hlt, nop
+
+--------------------------
+- Arithmethic Instructions
+--------------------------
+add, sub, mul, div, mod, and, or, xor
+
+All arithmetic instructions support Encoding-D and Encoding-E
+
+When given Encoding-D, the interpretation is:
+A = B OP C
+ex: add r0, r1, r2   ; r0 = r1 + r2
+
+The opcode encodings are:
+add : 0x10
+sub : 0x12
+mul : 0x14
+div : 0x16
+mod : 0x18
+and : 0x1A
+or  : 0x1C
+xor : 0x1E
+
+When given Encoding-E, the interpretation is:
+A = A OP LVAL
+ex: add r0, 1        ; r0 = r0 + 1
+
+The opcode encodings are:
+add : 0x11
+sub : 0x13
+mul : 0x15
+div : 0x17
+mod : 0x19
+and : 0x1B
+or  : 0x1D
+xor : 0x1F
+
+------------------------------------
+- Conditional Branching Instructions
+------------------------------------
+cmp, je, jne, jl, jle, jg, jge
+
+The cmp instruction supports Encoding-C and Encoding-E
+
+When given Encoding-C, the interpretation is:
+flags = A - B
+ex: cmp r0, r2       ; flags = r0 - r2
+
+The opcode encoding is:
+cmp : 0x53
+
+When given Encoding-E, the interpretation is:
+flags = A - LVAL
+ex: cmp r0, 2        ; flags = r0 - 2
+
+The opcode encoding is:
+cmp : 0x54
+
+The je, jne, jl, jle, jg and jge instructions support Encoding-F, where
+the LVAL is added to rip if the condition is met.
+
+The conditions for each are:
+
+je  -> flags == 0
+jne -> flags != 0
+jl  -> flags <  0
+jle -> flags <= 0
+jg  -> flags >  0
+jge -> flags >= 0
+
+je  : 0x21
+jne : 0x22
+jl  : 0x23
+jle : 0x24
+jg  : 0x25
+jge : 0x26
+
+----------------------------------------
+- Non-Conditional Branching Instructions
+----------------------------------------
+call, jmp, ret
+
+The call instruction supports Encoding-B and Encoding-F
+
+When given Encoding-B, the interpretation is:
+memory[rsp] = rip
+rsp = rsp - 2
+rip += A
+ex: call r0
+
+The opcode encoding is:
+call : 0x28
+
+When given Encoding-F, the interpretation is:
+memory[rsp] = rip
+rsp = rsp - 2
+rip += LVAL
+ex: call 48
+
+The jmp instruction supports Encoding-F
+
+When given Encoding-F, the interpreration is:
+rip += LVAL
+
+The opcode encoding is:
+jmp : 0x20
+ex: jmp -24
+
+The ret instruction supports Encoding-A
+
+When given Encoding-A, the interpretation is:
+rsp = rsp - 2
+rip = mem[rsp]
+ex: ret
+
+The opcode encoding is:
+ret : 0x29
+
+----------------------------
+- Memory-Access Instructions
+----------------------------
+load, loadb, stor, storb, push, pop
+
+There are three families of memory access instructions.
+load,  stor   = load and store 16-bit values
+loadb, storb, = load and store 8-bit values
+push,  pop    = push and pop 16-bit value to/from the stack
+
+load, stor, loadb and storb support Encoding-C and Encoding-E
+
+The opcode encodings for Encoding-C are:
+load  : 0x31
+loadb : 0x33
+stor  : 0x35
+storb : 0x37
+
+Pseudocode for these instructions are:
+load  r0, 0x0040 : r0 = mem[0x0040]
+loadb r0, 0x0040 : r0 = mem[0x0040] & 0x00FF
+stor  0x0040, r0 : mem[0x0040] = r0
+storb 0x0040, r0 : mem[0x0040] = r0 & 0x00FF (only modifies a single byte)
+
+The opcode encodings for Encoding-E are:
+load  : 0x30
+loadb : 0x32
+stor  : 0x34
+storb : 0x36
+
+Pseudocode for these instructions are:
+load  r0, r1 : r0 = mem[r1]
+loadb r0, r1 : r0 = mem[r1] & 0x00FF
+stor  r0, r1 : mem[r0] = r1
+storb r0, r1 : mem[r0] = r1 & 0x00FF (only modifies a single byte)
+
+push supports Encoding-B and Encoding-F
+
+When given Encoding-B, the interpretation is:
+rsp = rsp - 2
+mem[rsp] = A
+ex: push r0
+
+The opcode encoding is:
+push : 0x42
+
+When given Encoding-F, the interpretation is:
+rsp = rsp - 2
+mem[rsp] = LVAL
+ex: push 0x0090
+
+The opcode encoding is:
+push : 0x43
+
+pop supports Encoding-B
+
+When given Encoding-B, the interpreration is:
+A = mem[rsp]
+rsp = rsp + 2
+ex: pop r0
+
+The opcode encoding is:
+pop : 0x44
+
+------------------
+- I/O Instructions
+------------------
+in, out
+
+These instructions deal with stdin/stdout one byte at a time.
+
+in and out support Encoding -B
+
+When given Encoding-B, the interpretation of in is:
+A = getchar();
+ex: in r0
+
+The opcode encoding is:
+in : 0x40
+
+When given Encoding-B, the interpretation of out is:
+putchar(A);
+ex: out r0
+
+The opcode encoding is:
+out: 0x41
+
+----------------------------
+- Miscellaneous Instructions
+----------------------------
+mov, hlt, nop
+
+The mov instruction is used to move values into registers and to move values
+between registers.
+
+mov supports Encoding-C and Encoding-E
+
+When given Encoding-C, the interpretation of mov is:
+A = B
+ex: mov r0, r1
+
+The opcode encoding is:
+mov : 0x51
+
+When given Encoding-E, the interpretation of mov is:
+A = LVAL
+ex: mov r0, 0x0040
+
+The opcode encoding is:
+mov : 0x52
+
+The hlt instruction terminates execution of the VM. The nop instruction
+advances the instruction pointer and performs no operation.
+
+nop and hlt support Encoding-A
+
+The opcode encodings are:
+hlt : 0x60
+nop : 0x90
