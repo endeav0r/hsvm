@@ -1,5 +1,8 @@
-str_flag : "flag" ; this location will be 0x8080
+jmp begin_stage_2
 
+str_flag : "flag" ; this location will be 0x8084
+
+begin_stage_2 :
 mov rsp, 0xff00
 mov rbp, rsp
 
@@ -8,14 +11,15 @@ sub rsp, 0x10
 
 ; open "flags" file
 mov r2, 1
-mov r1, 0x8080
+mov r1, 0x8084
 mov r0, 0
 syscall
 
-; store filedes for "flags" file
+; store filedes for "flags" file and then place in r1
 mov r1, rbp
 sub r1, 2
 stor r1, r0
+mov r1, r0
 
 ; create 64 bytes of space for flags file
 sub rsp, 0x40
@@ -24,10 +28,6 @@ sub rsp, 0x40
 mov r3, 0x40
 mov r2, rsp
 mov r0, 1
-syscall
-
-; be nice, close filedes
-mov r0, 3
 syscall
 
 ; output contents of flags file

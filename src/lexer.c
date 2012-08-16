@@ -185,6 +185,9 @@ struct _token * lexer (const char * text)
         return NULL;
     }
 
+    if (lexer.last == NULL)
+        return NULL;
+
     if (lexer.last->type != TOK_NEWLINE)
         lexer_append(&lexer, token_create(TOK_NEWLINE, NULL, line));
 

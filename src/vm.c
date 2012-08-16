@@ -10,6 +10,8 @@
 
 #include "instruction.h"
 
+//#define DEBUG_SYSCALL
+
 struct _vm * vm_create (unsigned char * mem)
 {
     struct _vm * vm;
@@ -94,6 +96,10 @@ void vm_syscall_open (struct _vm * vm)
     if (r2 & VM_OPEN_CREATE)
         flags |= O_CREAT;
 
+    #ifdef DEBUG_SYSCALL
+    printf("syscall open: (%x) %s %x %x\n", r1, filename, r2, r3);
+    #endif
+
     vm->regs[REG_0] = open(filename, flags, r3);
 }
 
@@ -104,6 +110,10 @@ void vm_syscall_read (struct _vm * vm)
     uint16_t r2 = vm->regs[REG_2];
     uint16_t r3 = vm->regs[REG_3];
     void * buf  = &(vm->mem[r2]);
+
+    #ifdef DEBUG_SYSCALL
+    printf("syscall read: %x %x %x\n", r1, r2, r3);
+    #endif
 
     vm->regs[REG_0] = read(r1, buf, r3);
 }
@@ -333,6 +343,8 @@ int vm_step (struct _vm * vm)
     case OP_NOP :
         break;
     default :
+        // on a bad instruction, reset IP
+        vm->regs[REG_IP] -= 4;
         vm->halted = 1;
         return VM_BAD_INSTRUCTION;
     }

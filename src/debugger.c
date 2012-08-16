@@ -83,6 +83,8 @@ int main (int argc, char * argv [])
 
 	vm = vm_load(argv[1]);
 
+    printf("%s\n", vm_ins_str(vm));
+
 	while (1) {
         command = readline("> ");
         if (strlen(command) == 0)

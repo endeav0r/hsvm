@@ -77,7 +77,7 @@ news_command_loop :
 
     push str_command_help
     call strcmp
-    add rsp, 2 
+    add rsp, 4
     cmp r0, 0
     je news_command_return_help
 
