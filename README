@@ -16,6 +16,17 @@ Documentation TODO :
   syscall instruction
 
 ==========================
+= Table of Contents
+==========================
+This document is broken into the following sections
+ - Background
+ - HSVMv1 Conventions
+ - Instruction Encoding
+ - Registers
+ - Instructions
+ - System Calls
+
+==========================
 = BACKGROUND
 ==========================
 The HSVMv1 implements a big-endian, RISC CPU with 16-bit registers, 32-bit
@@ -42,6 +53,9 @@ Program execution will begin at address 0.
 
 There is no convention for format of data and code. The two are often found
 freely mixed throughout binaries. This may frustrate disassembly.
+
+System calls are performed by loading the desired system call to perform in r0
+and the remaining arguments in registers r1-r7 in ascending order.
 
 
 ==========================
@@ -129,7 +143,7 @@ cmp,  je,    jne,  jl,    jle,  jg,  jge
 call, jmp,   ret
 load, loadb, stor, storb, push, pop
 in,   out
-mov,  hlt, nop
+mov,  hlt, nop, syscall
 
 --------------------------
 - Arithmethic Instructions
@@ -337,7 +351,7 @@ out: 0x41
 ----------------------------
 - Miscellaneous Instructions
 ----------------------------
-mov, hlt, nop
+mov, hlt, nop, syscall
 
 The mov instruction is used to move values into registers and to move values
 between registers.
@@ -359,10 +373,20 @@ The opcode encoding is:
 mov : 0x52
 
 The hlt instruction terminates execution of the VM. The nop instruction
-advances the instruction pointer and performs no operation.
+advances the instruction pointer and performs no operation. The syscall
+instruction performs a system call and is handled directly by the VM. More
+information about system calls is detailed in the system calls section.
 
-nop and hlt support Encoding-A
+nop, syscall and hlt support Encoding-A
 
 The opcode encodings are:
-hlt : 0x60
-nop : 0x90
+hlt     : 0x60
+nop     : 0x90
+syscall : 0x61
+
+The syscall instruction performs a system call and is handled directly by
+the VM. More information about system calls is detailed in the syscall section.
+
+syscall supports Encoding-A
+
+The opcode endoding is:

@@ -68,6 +68,7 @@ uint8_t rule_matrix [][8] = {
     {OP_NOP,   TOK_NEWLINE, ASSEM_TERM},
     {TOK_LABELDEC, TOK_NUMBER, ASSEM_TERM},
     {TOK_LABELDEC, TOK_STRING, ASSEM_TERM},
+    {TOK_LABELDEC, TOK_LABEL, ASSEM_TERM},
     {TOK_LABELDEC, ASSEM_TERM},
     {TOK_NEWLINE, ASSEM_TERM},
     {ASSEM_TERM}
@@ -207,7 +208,12 @@ uint16_t assemble (struct _token * tokens, unsigned char * mem)
 
         if (rule == -1) {
             fprintf(stderr, "couldn't match rule, line %d\n", next->line);
-            fprintf(stderr, "%s\n", token_str(next));
+            for (peek = next;
+                 (peek != NULL) && (peek->type != TOK_NEWLINE);
+                 peek = peek->next) {
+                fprintf(stderr, "%s ", token_str(peek));
+            }
+            fprintf(stderr, "\n");
             exit(-1);
         }
 
@@ -222,17 +228,17 @@ uint16_t assemble (struct _token * tokens, unsigned char * mem)
             copy_instruction = 1;
             break;
 
-        case RULE_MOVLVAL  :
-        case RULE_MOVLABEL :
-        case RULE_CMPLVAL  :
-        case RULE_ADDLVAL  :
-        case RULE_SUBLVAL  :
-        case RULE_MULLVAL  :
-        case RULE_DIVLVAL  :
-        case RULE_MODLVAL  :
-        case RULE_ANDLVAL  :
-        case RULE_ORLVAL   :
-        case RULE_XORLVAL  :
+        case RULE_MOVLVAL    :
+        case RULE_MOVLABEL   :
+        case RULE_CMPLVAL    :
+        case RULE_ADDLVAL    :
+        case RULE_SUBLVAL    :
+        case RULE_MULLVAL    :
+        case RULE_DIVLVAL    :
+        case RULE_MODLVAL    :
+        case RULE_ANDLVAL    :
+        case RULE_ORLVAL     :
+        case RULE_XORLVAL    :
             if (next->type == OP_MOV) ins.opcode = OP_MOVLVAL;
             else if (next->type == OP_CMP) ins.opcode = OP_CMPLVAL;
             else if (next->type == OP_ADD) ins.opcode = OP_ADDLVAL;
@@ -361,6 +367,11 @@ uint16_t assemble (struct _token * tokens, unsigned char * mem)
             mem_i += strlen(peek->str) + 1;
             break;
 
+        case RULE_LABELLABEL :
+            labels_append(&labels, label_create(next->str, mem_i));
+            mem_i += 2;
+            break;
+
         case RULE_LABEL :
             labels_append(&labels, label_create(next->str, mem_i));
             break;
@@ -379,18 +390,18 @@ uint16_t assemble (struct _token * tokens, unsigned char * mem)
     while (next != NULL) {
         rule = match_rule(next);
         switch (rule) {
-        case RULE_JMP   :
-        case RULE_JE    :
-        case RULE_JNE   :
-        case RULE_JL    :
-        case RULE_JLE   :
-        case RULE_JG    :
-        case RULE_JGE   :
-        case RULE_CALL  :
-        case RULE_LOAD  :
-        case RULE_LOADB :
-        case RULE_STOR  :
-        case RULE_STORB :
+        case RULE_JMP       :
+        case RULE_JE        :
+        case RULE_JNE       :
+        case RULE_JL        :
+        case RULE_JLE       :
+        case RULE_JG        :
+        case RULE_JGE       :
+        case RULE_CALL      :
+        case RULE_LOAD      :
+        case RULE_LOADB     :
+        case RULE_STOR      :
+        case RULE_STORB     :
         case RULE_MOVLABEL  :
         case RULE_PUSHLABEL :
 
@@ -418,49 +429,60 @@ uint16_t assemble (struct _token * tokens, unsigned char * mem)
 
             memcpy(&(mem[mem_i]), &ins, sizeof(struct _instruction));
 
-        case RULE_MOV      :
-        case RULE_MOVLVAL  :
-        case RULE_CMP      :
-        case RULE_CMPLVAL  :
-        case RULE_ADD      :
-        case RULE_ADDLVAL  :
-        case RULE_SUB      :
-        case RULE_SUBLVAL  :
-        case RULE_MUL      :
-        case RULE_MULLVAL  :
-        case RULE_DIV      :
-        case RULE_DIVLVAL  :
-        case RULE_MOD      :
-        case RULE_MODLVAL  :
-        case RULE_AND      :
-        case RULE_ANDLVAL  :
-        case RULE_OR       :
-        case RULE_ORLVAL   :
-        case RULE_XOR      :
-        case RULE_XORLVAL  :
-        case RULE_JMPLVAL  :
-        case RULE_JELVAL   :
-        case RULE_JNELVAL  :
-        case RULE_JLLVAL   :
-        case RULE_JLELVAL  :
-        case RULE_JGLVAL   :
-        case RULE_JGELVAL  :
-        case RULE_CALLR    :
-        case RULE_RET      :
-        case RULE_LOADR    :
-        case RULE_LOADBR   :
-        case RULE_STORR    :
-        case RULE_STORBR   :
-        case RULE_IN       :
-        case RULE_OUT      :
-        case RULE_PUSH     :
-        case RULE_PUSHLVAL :
-        case RULE_POP      :
-        case RULE_HLT      :
-        case RULE_SYSCALL  :
-        case RULE_NOP      :
+        case RULE_MOV       :
+        case RULE_MOVLVAL   :
+        case RULE_CMP       :
+        case RULE_CMPLVAL   :
+        case RULE_ADD       :
+        case RULE_ADDLVAL   :
+        case RULE_SUB       :
+        case RULE_SUBLVAL   :
+        case RULE_MUL       :
+        case RULE_MULLVAL   :
+        case RULE_DIV       :
+        case RULE_DIVLVAL   :
+        case RULE_MOD       :
+        case RULE_MODLVAL   :
+        case RULE_AND       :
+        case RULE_ANDLVAL   :
+        case RULE_OR        :
+        case RULE_ORLVAL    :
+        case RULE_XOR       :
+        case RULE_XORLVAL   :
+        case RULE_JMPLVAL   :
+        case RULE_JELVAL    :
+        case RULE_JNELVAL   :
+        case RULE_JLLVAL    :
+        case RULE_JLELVAL   :
+        case RULE_JGLVAL    :
+        case RULE_JGELVAL   :
+        case RULE_CALLR     :
+        case RULE_RET       :
+        case RULE_LOADR     :
+        case RULE_LOADBR    :
+        case RULE_STORR     :
+        case RULE_STORBR    :
+        case RULE_IN        :
+        case RULE_OUT       :
+        case RULE_PUSH      :
+        case RULE_PUSHLVAL  :
+        case RULE_POP       :
+        case RULE_HLT       :
+        case RULE_SYSCALL   :
+        case RULE_NOP       :
             mem_i += sizeof(struct _instruction);
             break;
+
+        case RULE_LABELLABEL :
+            peek = token_peek(next, 1);
+
+            label = labels_search(&labels, peek->str);
+            if (label == NULL) {
+                fprintf(stderr, "could not find label: %s\n", peek->str);
+                exit(-1);
+            }
+            ins.lval = htons(label->location);
+            memcpy(&(mem[mem_i]), &(ins.lval), 2);
 
         case RULE_LABELNUM :
             mem_i += 2;

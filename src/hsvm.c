@@ -1,7 +1,10 @@
+#include <signal.h>
 #include <stdio.h>
 
 #include "instruction.h"
 #include "vm.h"
+
+int main_loop;
 
 void core_dump (struct _vm * vm)
 {
@@ -16,14 +19,22 @@ void core_dump (struct _vm * vm)
     fclose(fh);
 }
 
+void int_handler (int interrupt)
+{
+    main_loop = 0;
+}
+
 int main (int argc, char * argv [])
 {
     struct _vm * vm;
     int error;
 
-    vm = vm_load(argv[1]);
+    signal(SIGINT, int_handler);
 
-    while (1) {
+    vm = vm_load(argv[1]);
+    main_loop = 1;
+
+    while (main_loop) {
         //printf("%s\n", vm_ins_str(vm));
         error = vm_step(vm);
         if (error) {

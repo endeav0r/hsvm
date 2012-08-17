@@ -39,6 +39,7 @@ strcpy_done :
     ret
 
 
+
 strlen :
     push rbp
     mov rbp, rsp
@@ -59,12 +60,13 @@ strlen_loop :
     jmp strlen_loop
 
 strlen_done :
-    sub r0, r0, r2
+    sub r0, r0, r1
     
     pop r2
     pop r1
     pop rbp
     ret
+
 
 
 strcmp :
