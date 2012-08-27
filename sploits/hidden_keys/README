@@ -1,0 +1,9 @@
+hidden_keys is vulnerable to an overwrite at an attacker controlled location.
+The stack consists of three parts. Immediately below the base pointer is a
+canary which must equal \x00\x0a. Beneath that is a pointer to the base of
+a buffer used to store input, and then the buffer. By overwriting the address
+memory is written to, the attacker can gain control of the program.
+
+To exploit this, I chose to borrow the two stage exploit from news. I write
+the first stage over the instructions used in gets. Once the string is read
+in, stage_1 will begin running which will load and execute stage_2.
