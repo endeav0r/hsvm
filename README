@@ -387,6 +387,66 @@ syscall : 0x61
 The syscall instruction performs a system call and is handled directly by
 the VM. More information about system calls is detailed in the syscall section.
 
-syscall supports Encoding-A
 
-The opcode endoding is:
+==========================
+= SYSTEM CALLS
+==========================
+
+System calls are executed with the syscall instruction. r0 is set to a value
+corresponding to the desired system call. The registers r1-r7 are set to the
+arguments of the system call. The system call result is placed in r0 on return.
+
+There are four implement system calls in HSVMv1. They are:
+
+0: OPEN
+1: READ
+2: WRITE
+3: CLOSE
+
+------
+- open
+------
+
+uint16 open (const char * path, int oflag);
+
+oflag is a bitmask of the following values:
+  READ   - 1 - Open the file for reading
+  WRITE  - 2 - Open the file for writing
+  APPEND - 4 - Append to the file
+  CREATE - 8 - Create the file if it does not exist
+
+HSVM Assembly Example:
+  filename: "thefile"
+  mov r1, filename ; r1 holds the address of string "thefile"
+  mov r2, 1        ; r2 is set to READ
+  mov r0, 0        ; r0 is set to OPEN
+  syscall          ; r0 now holds the file descriptor, or 0xffff on error
+
+------
+- read
+------
+
+uint16 read (uint16 filedes, void * buf, uint16 buf_size);
+
+HSVM Assembly Example:
+  filename: "thefile"
+  mov r1, filename ; r1 holds the address of string "thefile"
+  mov r2, 1        ; r2 is set to READ
+  mov r0, 0        ; r0 is set to OPEN
+  syscall          ; r0 now holds the file descriptor, or 0xffff on error
+
+  mov r1, r0       ; set r1 to file descriptor
+  mov r2, rbp
+  sub r2, 0x80     ; buf is 64 bytes below base pointer
+  mov r3, 64       ; buffer is 32 bytes large
+  mov r0, 1        ; r0 is set to READ
+  syscall
+
+-------------
+- write, call
+-------------
+
+write and call do not include assembly examples.
+
+uint16 write (uint16 filedes, void * buf, uint16 buf_size);
+uint16 close (uint16 filedes);
