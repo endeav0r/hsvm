@@ -20,11 +20,13 @@ Documentation TODO :
 ==========================
 This document is broken into the following sections
  - Background
+ - Bug Reports
  - HSVMv1 Conventions
  - Instruction Encoding
  - Registers
  - Instructions
  - System Calls
+
 
 ==========================
 = BACKGROUND
@@ -37,6 +39,16 @@ Supremacy.
 There are four components to HSVMv1: assembler, disassembler, vm and debugger.
 
 This document outlines the details of the HSVMv1 instruction set.
+
+
+==========================
+= BUG REPORTS
+==========================
+Just like every challenge released during Haxathon Supremacy, HSVMv1 is 100%
+gauranteed bug-free. If you think you've found a bug, you haven't. If you
+_really_ think you've found a bug, maybe you should keep it to yourself because
+MAYBE, just _maybe_, *perhaps* there's a /tiny/, [slight] possibility it's
+important.
 
 
 ==========================
