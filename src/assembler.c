@@ -572,7 +572,10 @@ int main (int argc, char * argv[])
     }
 
     if (output_filename == NULL) {
-        printf("output filename required\n");
+        printf("usage: %s -o filename <sources>\n", argv[0]);
+        printf("\n");
+        printf(" -o specifies output filename\n");
+        printf(" <sources> specifices assembly files for input\n");
         return -1;
     }
 

@@ -67,7 +67,7 @@ int main (int argc, char * argv[])
             }
         }
         if (buf_i <= buf_size - 2) {
-            printf("%04x %02x%02x", (unsigned int) buf_i, buf[buf_i], buf[buf_i + 1]);
+            printf("%04x %02x%02x\n", (unsigned int) buf_i, buf[buf_i], buf[buf_i + 1]);
             buf_i += 2;
         }
         buf_i++;

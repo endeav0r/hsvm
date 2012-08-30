@@ -1,0 +1,152 @@
+
+    __  __      ____        __  __                            _     
+   /\ \/\ \    /\  _`\     /\ \/\ \    /'\_/`\              /' \    
+   \ \ \_\ \   \ \,\L\_\   \ \ \ \ \  /\      \    __  __  /\_, \   
+    \ \  _  \   \/_\__ \    \ \ \ \ \ \ \ \__\ \  /\ \/\ \ \/_/\ \  
+     \ \ \ \ \    /\ \L\ \   \ \ \_/ \ \ \ \_/\ \ \ \ \_/ |   \ \ \ 
+      \ \_\ \_\   \ `\____\   \ `\___/  \ \_\\ \_\ \ \___/     \ \_\
+       \/_/\/_/    \/_____/    `\/__/    \/_/ \/_/  \/__/       \/_/
+
+
+                  HAXATHON SUPREMACY VIRTUAL MACHINE v1
+                                  Usage
+                      endeavor@rainbowsandpwnies.com
+                               30 AUG 2012
+
+================
+= ASSEMBLER
+================
+
+The HSVM assembler takes at least two arguments. The first argument is the
+name of the output file. The remaining arguments are the names of source files
+to assemble and link.
+
+Labels may be used in one file and defined in another as long as both files are
+used in the assembly process.
+
+To assemble the example program:
+	./assembler -o helloworld examples/helloworld.s
+
+
+================
+= HSVM
+================
+
+The program hsvm is the main hsvm interpreter. It takes as its sole argument
+the name of a hsvm program to execute.
+
+To run the example program after assembly:
+	./hsvm helloworld
+
+
+================
+= DEBUGGER
+================
+
+The program debugger allows you to step through and debug a hsvm process. The
+available commands are:
+	- break, b
+	- continue, b
+	- core
+	- memory, m
+	- next, n
+	- registers, r
+	- restart
+	- step, s
+
+-------
+- break
+-------
+Break inserts a breakpoint. Execution will stop when the instruction pointer
+is equal to this value. It takes a hexadecimal address as its argument.
+
+The break command can be abbreviated as b.
+
+Example: b 0024
+
+----------
+- continue
+----------
+
+Continue will execute until the next breakpoint.
+
+The continue command can be abbreviated as c.
+
+Example: c
+
+------
+- core
+------
+
+Core will creat a file named core and write the entire 64kb memory process
+space to this file.
+
+Example: core
+
+--------
+- memory
+--------
+
+Memory will print the value of memory at a specific address. It takes two
+arguments, address and length. Address is specified in hexadecimal, and length
+is specified in decimal.
+
+If decimal is omitted, it is set to 8. If address is omitted, it is set to the
+value of the RSP register.
+
+Examples: m
+          m 0040
+          m 0040 64
+
+------
+- next
+------
+
+Next will execute the next instruction. This will follow calls.
+
+The next command can be abbreviated as n.
+
+Example: n
+
+-----------
+- registers
+-----------
+
+Registers will print the value of all registers.
+
+The registers command can be abbreviated as r.
+
+Example: r
+
+---------
+- restart
+---------
+
+Restart will restart the process.
+
+Example: restart
+
+------
+- step
+------
+
+Step will execute the next instruction. This will step "over" calls.
+
+The step command can be abbreviated as s.
+
+Example: s
+
+
+================
+= DISASSEMBLER
+================
+
+The disassembler disassembles hsvm instructions. It takes an optional argument,
+specified with the -o flag, which gives an offset into the file to begin
+disassembling at.
+
+Remember, instructions and data are freely mixed in hsvm programs.
+
+To disassemble the example program:
+	./disassemble helloworld
+	./disassemble -o 22 helloworld
