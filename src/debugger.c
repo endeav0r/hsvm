@@ -1,9 +1,8 @@
 #include <stdio.h>
 #include <string.h>
-#include <readline/readline.h>
-#include <readline/history.h>
 
 #include "instruction.h"
+#include "linenoise.h"
 #include "vm.h"
 
 #define BREAKPOINTS_SIZE 32
@@ -157,11 +156,11 @@ int main (int argc, char * argv [])
     printf("%s\n", vm_ins_str(vm));
 
     while (1) {
-        command = readline("> ");
+        command = linenoise("> ");
         if (strlen(command) == 0)
             command = last_command;
         else {
-            add_history(command);
+            linenoiseHistoryAdd(command);
             memset(last_command, 0, 64);
             strncpy(last_command, command, 63);
         }

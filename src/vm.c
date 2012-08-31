@@ -1,12 +1,17 @@
 #include "vm.h"
 
-#include <arpa/inet.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
+
+#ifdef WINDOWS
+    #include <winsock2.h>
+#else
+    #include <arpa/inet.h>
+#endif
 
 #include "instruction.h"
 

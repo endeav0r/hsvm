@@ -1,8 +1,13 @@
-#include <arpa/inet.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+
+#ifdef WINDOWS
+    #include <winsock2.h>
+#else
+    #include <arpa/inet.h>
+#endif
 
 #include "assembler.h"
 #include "instruction.h"

@@ -1,6 +1,11 @@
 #include "instruction.h"
 
-#include <arpa/inet.h>
+#ifdef WINDOWS
+    #include <winsock2.h>
+#else
+    #include <arpa/inet.h>
+#endif
+
 #include <stdio.h>
 
 const char * ins_reg_str (uint8_t reg) {
