@@ -1,4 +1,4 @@
-players has a use-after-free vulnerability. players consist of player objects
+players have a use-after-free vulnerability. players consist of player objects
 with pointers to a vtable of function pointers, a pointer to a heap allocated
 string and pointers to the next player object. When a player is deleted, the
 next pointer from the player's predecessor is not updated appropriately.
