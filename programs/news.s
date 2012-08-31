@@ -105,11 +105,11 @@ news_command_return_help :
     jmp news_command_return
 
 news_command_return_quit :
-    mov r0, 2
+    mov r0, 3 
     jmp news_command_return
 
 news_command_return_read :
-    mov r0, 3
+    mov r0, 2
     jmp news_command_return
 
 news_command_return :
