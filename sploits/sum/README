@@ -1,0 +1,12 @@
+The hashing algorithm in sum can be solved with a SAT solver. Make no mistake,
+it's quite a doozy.
+
+I had no luck with the z3 solver. STP saved the day.
+
+time ./stp --simplifying-minisat -s --SMTLIB2 solve.stp.smt
+
+The following inputs will result in a sum of 0x0000000000000000:
+0x4A42 0x8B9C 0xF40C 0x8CCD
+This means the correct input is: 4a428b9cf40c8ccd
+
+Many bothans died to bring us this information.
