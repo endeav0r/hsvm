@@ -9,7 +9,7 @@ str_you_entered    : "You Entered: "
 str_newline        : "\n"
 str_accepted       : "Password Accepted\n"
 str_denied         : "Password Denied\n"
-str_password       : "sigsac2013thiswillchange"
+str_password       : "hintpasswordnotimportant"
 str_canary_error   : "Stack canary was corrupted\n"
 
 main :
