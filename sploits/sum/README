@@ -1,7 +1,9 @@
 The hashing algorithm in sum can be solved with a SAT solver. Make no mistake,
 it's quite a doozy.
 
-I had no luck with the z3 solver. STP saved the day.
+I had no luck with the z3 solver. STP saved the day. solve.smt will be accepted
+by z3, solve.stp.smt will be solved by STP. STP solved this problem in 1 hour,
+45 minutes. z3 ran through the night and did not solve the problem.
 
 time ./stp --simplifying-minisat -s --SMTLIB2 solve.stp.smt
 
