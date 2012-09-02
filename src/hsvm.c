@@ -29,6 +29,11 @@ int main (int argc, char * argv [])
     struct _vm * vm;
     int error;
 
+    if (argc != 2) {
+        fprintf(stderr, "Usage: %s <hsvm program>\n", argv[0]);
+        return 0;
+    }
+
     signal(SIGINT, int_handler);
 
     vm = vm_load(argv[1]);
