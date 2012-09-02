@@ -1,0 +1,68 @@
+It's 0420 and I'm tired of writing these. It's called inception because it's a
+VM implemented in HSVM (get it). In any case, pseudo-code is provided below
+of what the VM does.
+
+make_key.py will create a key you can insert into the VM. The output from
+make.py needs to go in inception.s . You basically need to reverse this
+VM, discover how it works, and then figure out what input will print PASS.
+
+Currently the encoded bytes are:
+0xec 0x42 0x81 0x82 0x28 0xc0 0x04 0x92
+
+Making their unencoded counterparts:
+0x9b 0x3a 0xf8 0xf8 0x53 0xbc 0x79 0xec
+
+Causing this to print pass:
+echo -n $'\x9b\x3a\xf8\xf8\x53\xbc\x79\xec' | ./hsvm inception
+
+And the flag is:
+9B3AF8F853BC79EC
+
+[op][arg0][arg1]
+OPS
+	SET 0x00
+	ADD 0x01
+	SUB 0x02
+	XOR 0x03
+	CMP 0x04
+	JE  0x05
+	JMP 0x06
+	RET 0x07
+	IN  0x08
+	LOD 0x09
+
+set [0] $A
+set [1] $B
+set [2] $C
+set [3] $D
+set [4] $E
+set [5] $F
+set [6] $G
+set [7] $H
+set [8] 8 ; number of times to loop
+set [9] 77 ; encryption value
+set [a] 1 ; constant one
+set [b] 0 ; tmp value to hold decrypted value
+set [c] 0 ; constant zero
+set [d] 0 ; pointer in array for next value to decrypt
+set [f] 0 ; next value pulled from array
+
+LOOP
+	in  [b]     ; get input byte
+	add [9] [a] ; increment encryption value
+	lod [f] [d] ; move value pointed to by [d] into [b]
+	add [d] [a] ; increase [d] by 1
+	xor [f] [9] ; decryption
+	cmp [f] [b] ; compare input to decrypted value
+	je 1        ; jump over next instruction if equal
+	jmp FAIL    ; jump to FAIL is not equal
+	sub [8] [a] ; decrease number of times to loop
+	cmp [8] [c] ; check if we're done loop
+	je PASS     
+	jmp LOOP
+
+FAIL
+	ret [c]
+
+PASS
+	ret [a]
