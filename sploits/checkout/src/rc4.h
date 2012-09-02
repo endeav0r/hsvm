@@ -4,8 +4,8 @@
 #include <inttypes.h>
 
 struct _rc4 {
-	uint8_t S[256];
-	uint8_t key[16];
+    uint8_t S[256];
+    uint8_t key[16];
 };
 
 int       rc4_load_key (struct _rc4 * rc4, const char * filename);
