@@ -79,8 +79,7 @@ uint8_t * rc4_encrypt (struct _rc4 * rc4, uint8_t * data, uint32_t data_len)
 		k = rc4->S[(rc4->S[i] + rc4->S[j]) % 256];
 
 		checksum += result[data_i];
-		if (data_i < data_len + 4)
-			checksum = rotl(checksum, 8);
+		checksum = rotl(checksum, 8);
 
 		result[data_i] ^= k;
 	}
@@ -128,8 +127,7 @@ uint8_t * rc4_decrypt (struct _rc4 * rc4, uint8_t * data, uint32_t data_len)
 		else {
 			checksum += stored_length[data_i] ^ k;
 		}
-		if (data_i < data_len - 4)
-			checksum = rotl(checksum, 8);
+		checksum = rotl(checksum, 8);
 	}
 
 	memcpy(&stored_checksum, &(data[data_len - 4]), 4);
