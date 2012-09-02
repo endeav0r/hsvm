@@ -1,0 +1,55 @@
+checkout leaks information about the plaintext in the checksum check. The
+decryption program does not print the result of the decrypted message.
+Instead, it only prints whether decryption was successful or there was an
+error in the checksum.
+
+We must first understand the format of checkout messages:
+
++ is used as a concatenation operator
+
+uint32_t len       = the length of the message
+uint8_t  msg[]     = msg to be encrypted
+uint32_t checksum;
+
+checkout_message = RC4_ENCRYPT(len + msg) + checksum
+
+Note that RC4 is a stream cipher and creates its plaintext using this
+pseudo-algorithm:
+
+for byte in plaintext
+	K = next byte derived from keystream
+	output = output + byte XOR K
+
+Decryption works the same way, where the RC4 algorithm will create an
+identical keysteam and XOR each byte of the keystream against the ciphertext,
+therefor revealing the plaintext.
+
+checksum is calculated based on the plaintext bytes as such:
+
+checksum = 0
+for each plaintext byte :
+	checksum += byte
+	checksum = rotate_byte_left(checksum)
+
+The use of addition was carefully chosen as the means of creating checksum.
+Let's compare truth tables for bits between addition and XOR:
+
+0 ^ 0 = 0
+0 ^ 1 = 1
+1 ^ 0 = 1
+1 ^ 1 = 1
+
+0 + 0 = 0
+0 + 1 = 1
+1 + 0 = 1
+1 + 1 = 10
+
+We notice that in addition we receive different results for 0,0 and 1,1. This
+is important. If we flip two bits spaced 32-bits apart and they are identical,
+the checksum will be invalid. However, if the bits are identical, the checksum
+will remain valid.
+
+This gives us the ability to determine whether two bits are equal or differ.
+Because we know the value of the first 32 bits, they are equal to the length
+of the message, we can use the first 32 bits and the checksum to determine the
+value of every other bit in the message.
