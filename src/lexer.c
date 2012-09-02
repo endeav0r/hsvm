@@ -62,9 +62,12 @@ struct _token * lexer (const char * text)
 
         #define MATCHTOK(TOKSTR, TOKVAL) \
         if (strncmp(&(text[i]), #TOKSTR, strlen(#TOKSTR)) == 0) { \
-            lexer_append(&lexer, token_create(TOKVAL, #TOKSTR, line)); \
-            i += strlen(#TOKSTR); \
-            continue; \
+            if (    ((text[i+strlen(#TOKSTR)] < 'a') || (text[i+strlen(#TOKSTR)] > 'z')) \
+                 && (text[i+strlen(#TOKSTR)] != '_')) { \
+                lexer_append(&lexer, token_create(TOKVAL, #TOKSTR, line)); \
+                i += strlen(#TOKSTR); \
+                continue; \
+            } \
         }
 
         MATCHTOK(r0,      REG_0)
