@@ -134,7 +134,6 @@ uint8_t * rc4_decrypt (struct _rc4 * rc4, uint8_t * data, uint32_t data_len)
 	stored_checksum = ntohl(stored_checksum);
 
 	if (stored_checksum != checksum){
-		printf("%08x %08x\n", stored_checksum, checksum);
 		free(result);
 		return NULL;
 	}
