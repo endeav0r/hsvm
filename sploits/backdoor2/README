@@ -1,0 +1,10 @@
+Backdoor2 is the same as backdoor with two changes:
+	1) Shellcode must be XORed with 0x99
+	2) Characters 0x00 and 0x0a are disallowed
+
+Constraint 2 will force the attacker to create shellcode while will work under
+the restriction of common C string operations.
+
+This is easily accomplished with a 2-stage exploit. The first stage meets
+constraint 2 and copies the real payload into memory before jumping to it. The
+payload must meet constraints only imposed by the first stage (loader).

