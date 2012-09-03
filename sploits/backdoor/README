@@ -1,0 +1,9 @@
+Backdoor is a simple program which reads in shellcode and then jumps directly
+to the shellcode. The shellcode must contain three components:
+
+	The five byte sequence {'k', 'n', 'o', 'c', 'k'}
+	The actual shellcode absent byte 0x99
+	Byte 0x99 to signal the end of shellcode
+
+Execution will begin at address 0x8000, something for the player to keep in
+mind.

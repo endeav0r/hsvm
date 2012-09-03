@@ -1,0 +1,5 @@
+../../assembler -o sploit sploit.s
+echo -n "knock" > tmp
+cat sploit >> tmp
+echo -n $'\x99' >> tmp
+mv tmp sploit
