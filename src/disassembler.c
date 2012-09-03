@@ -1,3 +1,4 @@
+#include <arpa/inet.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -28,6 +29,34 @@ unsigned char * disassembler_load (const char * filename, size_t * filesize)
     return buf;
 }
 
+
+int is_branch (uint8_t * buf)
+{
+    struct _instruction * ins = (struct _instruction *) buf;
+    switch (ins->opcode) {
+        case OP_JMP  :
+        case OP_JE   :
+        case OP_JNE  :
+        case OP_JL   :
+        case OP_JLE  :
+        case OP_JG   :
+        case OP_JGE  :
+        case OP_CALL :
+            return 1;
+    };
+    return 0;
+}
+
+
+// oh god this hurts
+uint16_t branch_abs (uint8_t * buf, size_t ip)
+{
+    struct _instruction * ins = (struct _instruction *) buf;
+
+    return ip + ntohs(ins->lval);
+}
+
+
 int main (int argc, char * argv[])
 {
     int c;
@@ -46,7 +75,7 @@ int main (int argc, char * argv[])
         return -1;
     }
 
-    unsigned char * buf;
+    uint8_t * buf;
     size_t buf_size;
 
     buf = disassembler_load(argv[optind], &buf_size);
@@ -61,7 +90,14 @@ int main (int argc, char * argv[])
         if (buf_i <= buf_size - 4) {
             error = ins_str((struct _instruction *) &(buf[buf_i]), dis_str, 64);
             if (error > 0) {
-                printf("%04x %s\n", (unsigned int) buf_i, dis_str);
+                // destination for jump instructions
+                if (is_branch(&(buf[buf_i]))) {
+                    printf("%04x %s (%04x)\n", (unsigned int) buf_i, dis_str,
+                           branch_abs(&(buf[buf_i]), buf_i + 4));
+                }
+                else {
+                    printf("%04x %s\n", (unsigned int) buf_i, dis_str);
+                }
                 buf_i += 4;
                 continue;
             }
