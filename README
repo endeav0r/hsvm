@@ -5,13 +5,13 @@
     \ \  _  \   \/_\__ \    \ \ \ \ \ \ \ \__\ \  /\ \/\ \ \/_/\ \  
      \ \ \ \ \    /\ \L\ \   \ \ \_/ \ \ \ \_/\ \ \ \ \_/ |   \ \ \ 
       \ \_\ \_\   \ `\____\   \ `\___/  \ \_\\ \_\ \ \___/     \ \_\
-       \/_/\/_/    \/_____/    `\/__/    \/_/ \/_/  \/__/       \/_/
+       \/_/\/_/    \/_____/    `\/__/    \/_/ \/_/  \/__/       \/_/.1
 
 
-                  HAXATHON SUPREMACY VIRTUAL MACHINE v1
+                 HAXATHON SUPREMACY VIRTUAL MACHINE v1.1
                              Design Document
                       endeavor@rainbowsandpwnies.com
-                               12 AUG 2012
+                               03 SEP 2012
 Documentation TODO :
   syscall instruction
 
