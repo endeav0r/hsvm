@@ -1,0 +1,13 @@
+Key is a simple XOR cipher against 8 bytes. The 8 corresponding bytes, which
+equal the cipher bytes XORed with 0x77, comprise the key.
+
+The stored bytes are:
+d68633c196b4eddc
+
+Making the key: a1f144b6e1c39aab
+
+The solution is:
+
+echo -n $'\xa1\xf1\x44\xb6\xe1\xc3\x9a\xab' | ./hsvm key
+
+And the flag is the same as they key: a1f144b6e1c39aab
