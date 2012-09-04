@@ -106,7 +106,8 @@ int main (int argc, char * argv[])
             printf("%04x %02x%02x\n", (unsigned int) buf_i, buf[buf_i], buf[buf_i + 1]);
             buf_i += 2;
         }
-        buf_i++;
+        else
+            buf_i++;
     }
 
     free(buf);
