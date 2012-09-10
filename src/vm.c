@@ -312,6 +312,7 @@ int vm_step (struct _vm * vm)
         break;
     case OP_OUT :
         putchar(vm->regs[ins->operand_0]);
+        fflush(stdout);
         break;
     case OP_PUSH :
         vm->regs[REG_SP] -= 2;
