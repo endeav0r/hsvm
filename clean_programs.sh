@@ -6,3 +6,4 @@ rm -f key
 rm -f news
 rm -f players
 rm -f inception
+rm -f mod48
