@@ -143,7 +143,7 @@ struct _token * lexer (const char * text)
                        ((text[j] >= 'a') && (text[j] <= 'z'))
                     || ((text[j] >= '0') && (text[j] <= '9'))
                     || (text[j] == '_');
-                 j++) {printf("[%c]", text[j]);}
+                 j++) {}
             for (k = j; (text[k] == ' ') || (text[k] == '\t'); k++) {}
             strncpy(buf, &(text[i]), j - i < 64 ? j - i : 64);
             buf[j - i] = '\0';
