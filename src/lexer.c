@@ -63,6 +63,7 @@ struct _token * lexer (const char * text)
         #define MATCHTOK(TOKSTR, TOKVAL) \
         if (strncmp(&(text[i]), #TOKSTR, strlen(#TOKSTR)) == 0) { \
             if (    ((text[i+strlen(#TOKSTR)] < 'a') || (text[i+strlen(#TOKSTR)] > 'z')) \
+                 && ((text[i+strlen(#TOKSTR)] < '0') || (text[i+strlen(#TOKSTR)] > '9')) \
                  && (text[i+strlen(#TOKSTR)] != '_')) { \
                 lexer_append(&lexer, token_create(TOKVAL, #TOKSTR, line)); \
                 i += strlen(#TOKSTR); \
@@ -112,6 +113,7 @@ struct _token * lexer (const char * text)
         MATCHTOK(syscall, OP_SYSCALL)
         MATCHTOK(nop,     OP_NOP)
 
+        // numbers
         if (((text[i] >= '0') && (text[i] <= '9')) || (text[i] == '-')) {
             if ((text[i + 1] == 'x') && (text[i] != '-')) {
                 for (j = i + 2;
@@ -135,12 +137,13 @@ struct _token * lexer (const char * text)
             }
         }
 
+        // labels
         if ((text[i] >= 'a') && (text[i] <= 'z')) {
             for (j = i + 1; 
-                 ((text[j] >= 'a') && (text[j] <= 'z'))
+                       ((text[j] >= 'a') && (text[j] <= 'z'))
                     || ((text[j] >= '0') && (text[j] <= '9'))
                     || (text[j] == '_');
-                 j++) {}
+                 j++) {printf("[%c]", text[j]);}
             for (k = j; (text[k] == ' ') || (text[k] == '\t'); k++) {}
             strncpy(buf, &(text[i]), j - i < 64 ? j - i : 64);
             buf[j - i] = '\0';
@@ -156,6 +159,7 @@ struct _token * lexer (const char * text)
             continue;
         }
 
+        // strings
         if (text[i] == '"') {
             char * tmpstr = (char *) malloc(4096);
             j = i + 1;
