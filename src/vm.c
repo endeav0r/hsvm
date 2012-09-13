@@ -301,7 +301,6 @@ int vm_step (struct _vm * vm)
         memcpy(&(vm->mem[vm->regs[ins->operand_0]]), &tmp, 2);
         break;
     case OP_STORB :
-        printf("storb: %x %x\n", ins->lval, vm->regs[ins->operand_0]);
         vm->mem[ins->lval] = vm->regs[ins->operand_0] & 0xff;
         break;
     case OP_STORBR :
