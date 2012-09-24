@@ -135,7 +135,7 @@ int ins_str (const struct _instruction * ins, char * buf, size_t buf_size)
     case OP_JGE      :
     case OP_CALL     :
     case OP_PUSHLVAL :
-        snprintf(lval, 8, "%d", ntohs(ins->lval));
+        snprintf(lval, 8, "%x", ntohs(ins->lval));
         return snprintf(buf, buf_size, "%s %s", opcode, lval);
 
     case OP_LOAD    :

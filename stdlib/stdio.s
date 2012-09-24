@@ -17,8 +17,6 @@ puts_loop :
     jmp puts_loop
 
 puts_done :
-    sub r0, r1, r0
-
     pop r1
     pop rbp
     ret

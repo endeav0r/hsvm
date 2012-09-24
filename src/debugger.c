@@ -1,5 +1,8 @@
+#include <fcntl.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "instruction.h"
 #include "linenoise.h"
@@ -7,6 +10,47 @@
 
 #define BREAKPOINTS_SIZE 32
 int breakpoints[32];
+
+#define PIPED_INPUT_SIZE 8192
+unsigned char piped_input[PIPED_INPUT_SIZE];
+size_t        piped_input_len = 0;
+
+
+void read_piped_input ()
+{
+    int read_bytes;
+
+    piped_input_len = 0;
+
+    int flags = fcntl(0, F_GETFD, 0);
+    fcntl(0, F_SETFL, flags | O_NONBLOCK);
+
+    while (piped_input_len < PIPED_INPUT_SIZE) {
+        read_bytes = read(0,
+                          &(piped_input[piped_input_len]),
+                          PIPED_INPUT_SIZE - piped_input_len);
+        printf("read_bytes: %d\n", (int) read_bytes);
+        if (read_bytes <= 0)
+            break;
+        piped_input_len += read_bytes;
+    }
+
+    fclose(stdin);
+    freopen("/dev/tty", "r+b", stdin);
+}
+
+
+// debug getchar to handle piped input
+int debug_getchar ()
+{
+    static size_t piped_i = 0;
+
+    if (piped_i >= piped_input_len)
+        return getc(stdin);
+
+    return (unsigned int) piped_input[piped_i++];
+}
+
 
 int debug_next (struct _vm * vm)
 {
@@ -151,12 +195,17 @@ int main (int argc, char * argv [])
 
     breakpoints[0] = -1;
 
+    read_piped_input();
+
     vm = vm_load(argv[1]);
 
     printf("%s\n", vm_ins_str(vm));
 
     while (1) {
-        command = linenoise("> ");
+        if ((command = linenoise("> ")) == 0) {
+            printf("command == 0\n");
+            break;
+        }
         if (strlen(command) == 0)
             command = last_command;
         else {
@@ -166,35 +215,35 @@ int main (int argc, char * argv [])
         }
 
         if (    (strncmp(command, "break", 5) == 0)
-             || (strncmp(command, "b", 1) == 0)) {
+             || (strncmp(command, "b", 1)     == 0)) {
             set_breakpoint(command);
         }
-        else if (    (strncmp(command, "continue", 5) == 0)
-             || (strncmp(command, "c", 1) == 0)) {
-            debug_continue(vm);
-        }
-        else if (strncmp(command, "core", 5) == 0) {
+        else if (strncmp(command, "core", 4) == 0) {
             dump_core(vm);
         }
+        else if (    (strncmp(command, "continue", 8) == 0)
+                  || (strncmp(command, "c", 1)        == 0)) {
+            debug_continue(vm);
+        }
         else if (    (strncmp(command, "memory", 6) == 0)
-             || (strncmp(command, "m", 1) == 0)){
+                  || (strncmp(command, "m", 1)      == 0)){
             debug_memory(vm, command);
         }
-        else if (    (strcmp(command, "next") == 0)
-             || (strcmp(command, "n") == 0)) {
+        else if (    (strncmp(command, "next", 4) == 0)
+                  || (strcmp(command, "n")        == 0)) {
             debug_next(vm);
             printf("%s\n", vm_ins_str(vm));
         }
-        else if (    (strcmp(command, "registers") == 0)
-                  || (strcmp(command, "r") == 0)) {
+        else if (    (strncmp(command, "registers", 9) == 0)
+                  || (strncmp(command, "r", 1)         == 0)) {
             printf("%s\n", vm_registers_str(vm));
         }
-        else if (strcmp(command, "restart") == 0) {
+        else if (strncmp(command, "restart", 7) == 0) {
             vm_destroy(vm);
             vm = vm_load(argv[1]);
         }
-        else if (    (strcmp(command, "step") == 0)
-                  || (strcmp(command, "s") == 0)) {
+        else if (    (strncmp(command, "step", 4) == 0)
+                  || (strncmp(command, "s", 1)    == 0)) {
             debug_step(vm);
             printf("%s\n", vm_ins_str(vm));
         }

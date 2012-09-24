@@ -301,7 +301,7 @@ static int linenoisePrompt(int fd, char *buf, size_t buflen, const char *prompt)
      * initially is just an empty string. */
     linenoiseHistoryAdd("");
     
-    if (write(fd,prompt,plen) == -1) return -1;
+    if (write(1,prompt,plen) == -1) return -1;
     while(1) {
         char c;
         int nread;

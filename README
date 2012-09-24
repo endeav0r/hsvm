@@ -5,15 +5,13 @@
     \ \  _  \   \/_\__ \    \ \ \ \ \ \ \ \__\ \  /\ \/\ \ \/_/\ \  
      \ \ \ \ \    /\ \L\ \   \ \ \_/ \ \ \ \_/\ \ \ \ \_/ |   \ \ \ 
       \ \_\ \_\   \ `\____\   \ `\___/  \ \_\\ \_\ \ \___/     \ \_\
-       \/_/\/_/    \/_____/    `\/__/    \/_/ \/_/  \/__/       \/_/.1
+       \/_/\/_/    \/_____/    `\/__/    \/_/ \/_/  \/__/       \/_/.2
 
 
-                 HAXATHON SUPREMACY VIRTUAL MACHINE v1.1
+                 HAXATHON SUPREMACY VIRTUAL MACHINE v1.2
                              Design Document
                       endeavor@rainbowsandpwnies.com
-                               03 SEP 2012
-Documentation TODO :
-  syscall instruction
+                               19 SEP 2012
 
 ==========================
 = Table of Contents
@@ -266,7 +264,7 @@ ex: jmp -24
 The ret instruction supports Encoding-A
 
 When given Encoding-A, the interpretation is:
-rsp = rsp - 2
+rsp = rsp + 2
 rip = mem[rsp]
 ex: ret
 
@@ -292,10 +290,10 @@ stor  : 0x35
 storb : 0x37
 
 Pseudocode for these instructions are:
-load  r0, 0x0040 : r0 = mem[0x0040]
-loadb r0, 0x0040 : r0 = mem[0x0040] & 0x00FF
-stor  0x0040, r0 : mem[0x0040] = r0
-storb 0x0040, r0 : mem[0x0040] = r0 & 0x00FF (only modifies a single byte)
+load  r0, r1 : r0 = mem[r1]
+loadb r0, r1 : r0 = mem[r1] & 0x00FF
+stor  r0, r1 : mem[r0] = r1
+storb r0, r1 : mem[r0] = r1 & 0x00FF (only modifies a single byte)
 
 The opcode encodings for Encoding-E are:
 load  : 0x30
@@ -304,10 +302,10 @@ stor  : 0x34
 storb : 0x36
 
 Pseudocode for these instructions are:
-load  r0, r1 : r0 = mem[r1]
-loadb r0, r1 : r0 = mem[r1] & 0x00FF
-stor  r0, r1 : mem[r0] = r1
-storb r0, r1 : mem[r0] = r1 & 0x00FF (only modifies a single byte)
+load  r0, 0x0040 : r0 = mem[0x0040]
+loadb r0, 0x0040 : r0 = mem[0x0040] & 0x00FF
+stor  0x0040, r0 : mem[0x0040] = r0
+storb 0x0040, r0 : mem[0x0040] = r0 & 0x00FF (only modifies a single byte)
 
 push supports Encoding-B and Encoding-F
 

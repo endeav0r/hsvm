@@ -13,6 +13,11 @@
     #include <arpa/inet.h>
 #endif
 
+#ifdef DEBUG_GETCHAR
+    int debug_getchar ();
+    #define getchar debug_getchar
+#endif
+
 #include "instruction.h"
 
 //#define DEBUG_SYSCALL
