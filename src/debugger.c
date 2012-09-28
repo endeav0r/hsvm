@@ -29,7 +29,6 @@ void read_piped_input ()
         read_bytes = read(0,
                           &(piped_input[piped_input_len]),
                           PIPED_INPUT_SIZE - piped_input_len);
-        printf("read_bytes: %d\n", (int) read_bytes);
         if (read_bytes <= 0)
             break;
         piped_input_len += read_bytes;
@@ -202,10 +201,8 @@ int main (int argc, char * argv [])
     printf("%s\n", vm_ins_str(vm));
 
     while (1) {
-        if ((command = linenoise("> ")) == 0) {
-            printf("command == 0\n");
+        if ((command = linenoise("> ")) == 0)
             break;
-        }
         if (strlen(command) == 0)
             command = last_command;
         else {

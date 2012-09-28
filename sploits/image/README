@@ -1,0 +1,11 @@
+Image format
+
+2 bytes for image size
+image bytes
+
+if high bit is set
+	if byte == 0x00
+if high bit set
+	7 bits of RLE for following byte
+if high bit is not set
+	output following byte

@@ -8,3 +8,4 @@ rm -f news
 rm -f players
 rm -f inception
 rm -f mod48
+rm -f image
