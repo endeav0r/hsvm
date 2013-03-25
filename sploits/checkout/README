@@ -37,7 +37,7 @@ Let's compare truth tables for bits between addition and XOR:
 0 ^ 0 = 0
 0 ^ 1 = 1
 1 ^ 0 = 1
-1 ^ 1 = 1
+1 ^ 1 = 0
 
 0 + 0 = 0
 0 + 1 = 1
