@@ -453,10 +453,10 @@ HSVM Assembly Example:
   syscall
 
 -------------
-- write, call
+- write, close
 -------------
 
-write and call do not include assembly examples.
+write and close do not include assembly examples.
 
 uint16 write (uint16 filedes, void * buf, uint16 buf_size);
 uint16 close (uint16 filedes);
